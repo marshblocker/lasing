@@ -93,7 +93,7 @@ def main():
 						walkers[i]["pos"] = new_pos
 						break
 
-				if not len(available):
+				if not len(available_directions):
 					walkers[i]["free"] = False 
 					stuck_walkers_count += 1
 
