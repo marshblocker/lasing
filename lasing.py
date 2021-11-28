@@ -1,18 +1,40 @@
 from os import system
 from time import sleep
+from typing import NewType, TypedDict
 import random
-from typing import Callable, NewType
-
 
 GRID_CHAR = '*'
-BOARD_WIDTH = 50
-BOARD_HEIGHT = 25
-
-BoardType = NewType("BoardType", list[list[bool]])
+BOARD_WIDTH = 80
+BOARD_HEIGHT = 40
 
 
-def check_and_update_board(direction: int, old_pos: tuple[int, int], 
-			 			   board: BoardType) -> tuple[bool, tuple[int, int]]:
+class Walker(TypedDict):
+	pos: list[int]
+	free: bool
+
+
+Traversed = bool
+BoardType = NewType("BoardType", list[list[Traversed]])
+WalkersType = NewType("WalkersType", list[Walker])
+
+
+def populate_board(board: BoardType, n: int) -> WalkersType:
+	walkers = WalkersType([{"pos": [0, 0], "free": True} for _ in range(n)])
+
+	for i in range(n):
+		while True:
+			r: int = random.randint(0, BOARD_HEIGHT-1)
+			c: int = random.randint(0, BOARD_WIDTH-1)
+			if not board[r][c]:
+				walkers[i]["pos"] = [r, c]
+				board[r][c] = True
+				break 
+
+	return walkers
+
+
+def check_and_update_board(direction: int, old_pos: list[int], 
+			   board: BoardType) -> tuple[bool, list[int]]:
 	occupied: bool = True  
 	r, c  = old_pos
 	match direction:
@@ -30,7 +52,7 @@ def check_and_update_board(direction: int, old_pos: tuple[int, int],
 		if not occupied:
 			board[r][c] = True
 
-	return (occupied, (r, c))
+	return (occupied, [r, c])
 
 
 def clear_screen() -> None:
@@ -39,7 +61,7 @@ def clear_screen() -> None:
 
 def print_board(board: BoardType, clear: bool = True) -> None:
 	board_str = "\n".join(["".join([GRID_CHAR if e else " " for e in row]) 
-								for row in board])
+			       for row in board])
 	print(board_str)
 	if clear:
 		sleep(0.001)
@@ -47,26 +69,34 @@ def print_board(board: BoardType, clear: bool = True) -> None:
 
 
 def main():
+	n = int(input("n: "))
 	board = BoardType([[False for _ in range(BOARD_WIDTH)] 
-							for _ in range(BOARD_HEIGHT)])
-	r: int = random.randint(0, BOARD_HEIGHT-1)
-	c: int = random.randint(0, BOARD_WIDTH-1)
-	board[r][c] = True
+			   	for _ in range(BOARD_HEIGHT)])
+	walkers: WalkersType = populate_board(board, n)
 
-	while True:
+	stuck_count = 0
+	while stuck_count != n:
 		print_board(board)
-		tries = 0
-		while tries < 100:
-			direction: int = random.randint(0, 3)
-			occupied, new_pos = \
-				check_and_update_board(direction, (r, c), board)	
-			if not occupied:
-				r, c = new_pos
-				break
-			else:
-				tries += 1
-		if tries >= 100:
-			break
+		for i in range(len(walkers)):
+			available: list[int] = [0, 1, 2, 3]
+
+			if walkers[i]["free"]:
+				while len(available):
+					direction: int = random.choice(available)
+					occupied, new_pos = \
+						check_and_update_board(direction, 
+								       walkers[i]["pos"], board)	
+
+					if occupied:
+						available.remove(direction)
+					else:
+						walkers[i]["pos"] = new_pos
+						break
+
+				if not len(available):
+					walkers[i]["free"] = False 
+					stuck_count += 1
+
 	print_board(board, clear= False)
 
 
