@@ -37,8 +37,7 @@ def clear_screen() -> None:
 	system('cls')
 
 
-def print_board(board: BoardType, 
-								  clear: bool = True) -> None:
+def print_board(board: BoardType, clear: bool = True) -> None:
 	board_str = "\n".join(["".join([GRID_CHAR if e else " " for e in row]) 
 								for row in board])
 	print(board_str)
