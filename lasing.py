@@ -74,28 +74,28 @@ def main():
 			   	for _ in range(BOARD_HEIGHT)])
 	walkers: WalkersType = populate_board(board, n)
 
-	stuck_count = 0
-	while stuck_count != n:
+	stuck_walkers_count = 0
+	while stuck_walkers_count != n:
 		print_board(board)
 		for i in range(len(walkers)):
-			available: list[int] = [0, 1, 2, 3]
+			available_directions: list[int] = [0, 1, 2, 3]
 
 			if walkers[i]["free"]:
-				while len(available):
-					direction: int = random.choice(available)
+				while len(available_directions):
+					direction: int = random.choice(available_directions)
 					occupied, new_pos = \
 						check_and_update_board(direction, 
 								       walkers[i]["pos"], board)	
 
 					if occupied:
-						available.remove(direction)
+						available_directions.remove(direction)
 					else:
 						walkers[i]["pos"] = new_pos
 						break
 
 				if not len(available):
 					walkers[i]["free"] = False 
-					stuck_count += 1
+					stuck_walkers_count += 1
 
 	print_board(board, clear= False)
 
