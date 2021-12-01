@@ -9,8 +9,8 @@ BOARD_HEIGHT = 40
 
 
 class Walker(TypedDict):
-	pos: list[int]
-	free: bool
+    pos: list[int]
+    free: bool
 
 
 Traversed = bool
@@ -19,86 +19,86 @@ WalkersType = NewType("WalkersType", list[Walker])
 
 
 def populate_board(board: BoardType, n: int) -> WalkersType:
-	walkers = WalkersType([{"pos": [0, 0], "free": True} for _ in range(n)])
+    walkers = WalkersType([{"pos": [0, 0], "free": True} for _ in range(n)])
 
-	for i in range(n):
-		while True:
-			r: int = random.randint(0, BOARD_HEIGHT-1)
-			c: int = random.randint(0, BOARD_WIDTH-1)
-			if not board[r][c]:
-				walkers[i]["pos"] = [r, c]
-				board[r][c] = True
-				break 
+    for i in range(n):
+        while True:
+            r: int = random.randint(0, BOARD_HEIGHT - 1)
+            c: int = random.randint(0, BOARD_WIDTH - 1)
+            if not board[r][c]:
+                walkers[i]["pos"] = [r, c]
+                board[r][c] = True
+                break
 
-	return walkers
+    return walkers
 
 
-def check_and_update_board(direction: int, old_pos: list[int], 
-			   board: BoardType) -> tuple[bool, list[int]]:
-	occupied: bool = True  
-	r, c  = old_pos
-	match direction:
-		case 0:	# UP
-			r += 1
-		case 1: # RIGHT
-			c += 1
-		case 2: # DOWN
-			r -= 1
-		case 3: # LEFT
-			c -= 1
+def check_and_update_board(direction: int, old_pos: list[int],
+                           board: BoardType) -> tuple[bool, list[int]]:
+    occupied: bool = True
+    r, c = old_pos
+    match direction:
+        case 0:  # UP
+            r += 1
+        case 1:  # RIGHT
+            c += 1
+        case 2:  # DOWN
+            r -= 1
+        case 3:  # LEFT
+            c -= 1
 
-	if 0 < r < BOARD_HEIGHT and 0 < c < BOARD_WIDTH:
-		occupied = board[r][c]
-		if not occupied:
-			board[r][c] = True
+    if 0 < r < BOARD_HEIGHT and 0 < c < BOARD_WIDTH:
+        occupied = board[r][c]
+        if not occupied:
+            board[r][c] = True
 
-	return (occupied, [r, c])
+    return (occupied, [r, c])
 
 
 def clear_screen() -> None:
-	system('cls')
+    system('cls')
 
 
 def print_board(board: BoardType, clear: bool = True) -> None:
-	board_str = "\n".join(["".join([GRID_CHAR if e else " " for e in row]) 
-			       for row in board])
-	print(board_str)
-	if clear:
-		sleep(0.001)
-		clear_screen()
+    board_str = "\n".join(["".join([GRID_CHAR if e else " " for e in row])
+                           for row in board])
+    print(board_str)
+    if clear:
+        sleep(0.001)
+        clear_screen()
 
 
 def main():
-	n = int(input("n: "))
-	board = BoardType([[False for _ in range(BOARD_WIDTH)] 
-			   	for _ in range(BOARD_HEIGHT)])
-	walkers: WalkersType = populate_board(board, n)
+    n = int(input("n: "))
+    board = BoardType([[False for _ in range(BOARD_WIDTH)]
+                       for _ in range(BOARD_HEIGHT)])
+    walkers: WalkersType = populate_board(board, n)
 
-	stuck_walkers_count = 0
-	while stuck_walkers_count != n:
-		print_board(board)
-		for i in range(len(walkers)):
-			available_directions: list[int] = [0, 1, 2, 3]
+    stuck_walkers_count = 0
+    while stuck_walkers_count != n:
+        print_board(board)
+        for i in range(len(walkers)):
+            available_directions: list[int] = [0, 1, 2, 3]
 
-			if walkers[i]["free"]:
-				while len(available_directions):
-					direction: int = random.choice(available_directions)
-					occupied, new_pos = \
-						check_and_update_board(direction, 
-								       walkers[i]["pos"], board)	
+            if walkers[i]["free"]:
+                while len(available_directions):
+                    direction: int = random.choice(available_directions)
+                    occupied, new_pos = \
+                        check_and_update_board(direction,
+                                               walkers[i]["pos"], board)
 
-					if occupied:
-						available_directions.remove(direction)
-					else:
-						walkers[i]["pos"] = new_pos
-						break
+                    if occupied:
+                        available_directions.remove(direction)
+                    else:
+                        walkers[i]["pos"] = new_pos
+                        break
 
-				if not len(available_directions):
-					walkers[i]["free"] = False 
-					stuck_walkers_count += 1
+                if not len(available_directions):
+                    walkers[i]["free"] = False
+                    stuck_walkers_count += 1
 
-	print_board(board, clear= False)
+    print_board(board, clear=False)
 
 
 if __name__ == "__main__":
-	main()
+    main()
